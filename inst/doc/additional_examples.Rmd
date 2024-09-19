@@ -1,0 +1,233 @@
+---
+title: "Additional Examples for canvasXpress in R"
+author: "Connie Brett"
+date: "`r Sys.Date()`"
+output: 
+    rmarkdown::html_vignette:
+        toc: TRUE
+        toc_depth: 4
+vignette: >
+  %\VignetteIndexEntry{Additional Examples for canvasXpress in R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Data from an R perspective
+
+The canvasXpress JavaScript functionality in the browser generally expects data to be in a wide format and utilizes both column- and row-names to cross-reference and access the various slices of data needed to make the charts.  The package will warn you if that data you provide doesn't match up, and it is likely that one of your structures is simply the wrong format or is missing the row or column names.
+
+
+### Variables
+
+Variables are the rows of data and the variable names are drawn from the row names.  It is helpful to keep in mind that there are a number of manipulations and functions in R that remove or reset rownames on various data structures.
+
+
+### Samples
+
+Samples are the columns of data and the sample names are drawn from the column names.  
+
+
+### Annotations
+
+Annotations are considered to be *extra* information or characteristics.  These data add to the information about samples or variables but are not a part of the main dataset.
+
+
+### Item Indexing
+
+Some charts can be built in canvasXpress based on the index of the data instead of names.  The JavaScript language uses 0-based indexing whereas the R language uses 1-based indexing.  This means that to access the first item in a vectors column, row, etc in JavaScript the index would is 0, whereas the first item in that same structure in R would have an index of 1.
+
+This discrepancy in indexing means that when sending data indexes to canvasXpress from R it is crucial to adjust your R index (subtract 1) since the canvasXpress charts (even within RStudio) are *always* created from a JavaScript perspective.
+
+
+### JSON Data (tips on matching R)
+
+The JSON format for the data is essentially a list of lists.  From a data perspective the y list (compartment) is where the numerical data resides with three sub-lists - the names of the variables, the names of the samples, and the actual data.  The x list contains the sample annotation data, and the z list contains the variable annotation data.  
+
+When utilizing the canvasXpress functions from R the following mappings are made, which covers the most common charts.  There are additional named lists and properties that are mapped for specific chart types and covered with those chart examples below.
+
+> data -> y  
+> &nbsp;&nbsp;&nbsp;&nbsp;*y.vars = row names*  
+> &nbsp;&nbsp;&nbsp;&nbsp;*y.smps = column names*  
+> &nbsp;&nbsp;&nbsp;&nbsp;*y.data = values*  
+> smpAnnot -> x  
+> varAnnot -> z
+
+
+## Examples
+
+### Data Preparation
+
+Examples here use data manipulated with the tidyverse related packages (dplyr, tibble, etc).  This is just one way to manipulate data into the correct format to plot in CanvasXpress.
+
+
+A variety of commonly-used canvasXpress options are used below to provide examples of how to position, resize and configure various aspects of the charts from the call to the CanvasXpress function in R.  This includes items such as the Axis Titles, Legends, Colors, etc.  All of these optional parameters are documented on the main CanvasXpress site at https://www.canvasxpress.org.
+
+```r
+library(canvasXpress)
+library(dplyr)
+library(tibble)
+library(tidyr)
+
+data <- USArrests %>%
+    rownames_to_column(var = "State") %>%
+    mutate(Total = (Assault + Rape + Murder),
+           Category = cut(Total, 3, 
+                          labels = c("low", "med", "high"),
+                          ordered_result = T)) 
+```
+
+### Scatter 2D Chart
+
+```r
+cxdata          <- data %>% select(Murder, Assault)
+cxdata.varAnnot <- data %>% select(UrbanPop, Category) 
+
+rownames(cxdata) <- data[, "State"]
+rownames(cxdata.varAnnot) <- data[, "State"]
+
+canvasXpress(data                    = cxdata,
+             varAnnot                = cxdata.varAnnot,
+             graphType               = "Scatter2D",
+             colorBy                 = "UrbanPop",
+             shapeBy                 = "Category",
+             legendPosition          = "right",
+             legendOrder             = list("Category" = list("low", "med", "high")),
+             title                   = "Murder vs Assault Rates",
+             xAxisMinorTicks         = FALSE,
+             yAxisMinorTicks         = FALSE)
+```
+![Scatter2D](images/R-Scatter2D.jpg)
+
+### Stacked Bar Chart
+
+```r
+cxdata           <- t(data %>% select(Assault, Rape, Murder))
+colnames(cxdata) <- data$State
+
+canvasXpress(data                  = cxdata,
+             graphType             = "Stacked",
+             colorScheme           = "Blues",
+             graphOrientation      = "vertical",
+             legendInside          = TRUE,
+             legendPosition        = "topRight",
+             legendBackgroundColor = 'white',
+             smpLabelRotate        = 20,
+             title                 = "US Arrests by State and Type",
+             xAxisTitle            = "Total Arrests",
+             xAxis2Title           = "Total Arrests")
+```
+![StackedBar](images/R-StackedBar.jpg)
+
+### Clustered Bar Chart
+
+#### CanvasXpress clustering
+
+```r
+cxdata           <- t(data %>% select(Assault, Rape, Murder))
+colnames(cxdata) <- data$State
+
+canvasXpress(data                    = cxdata,
+             graphType               = "Stacked",
+             graphOrientation        = "horizontal",
+             colorScheme             = "Reds",
+             showSampleNames         = FALSE,
+             title                   = "Clustered Arrests",
+             subtitle                = "(by State and Type)",
+             titleScaleFontFactor    = 0.6,
+             subtitleScaleFontFactor = 0.4,
+             xAxisShow               = FALSE,
+             xAxis2Title             = "Total Arrests",
+             legendPosition          = "bottom",
+             legendColumns           = 3,
+             sampleSpaceFactor       = 0.5,
+#canvasXpress clustering options  
+             samplesClustered        = TRUE,
+             linkage                 = "single",
+             distance                = "manhattan",
+             smpDendrogramPosition   = "left")
+```
+![ClusteredBar1](images/R-ClusteredBar1.jpg)
+
+
+### Boxplot
+
+```r
+reshape <- data %>% gather(key = "Type", value = "Rate", 
+                           Assault, Rape, Murder)
+
+cxdata           <- t(reshape %>% select(Rate))
+cxdata.smpAnnot  <- t(reshape %>% select(Type))
+
+colnames(cxdata.smpAnnot) <- colnames(cxdata)
+
+canvasXpress(data                  = cxdata,
+             smpAnnot              = cxdata.smpAnnot,
+             graphType             = "Boxplot",
+             colorScheme           = "Pastel",
+             colorBy               = "Type",
+             graphOrientation      = "vertical",
+             groupingFactors       = list("Type"),
+             smpLabelFontStyle     = "italic",
+             smpLabelRotate        = 90,
+             showLegend            = FALSE,
+             title                 = "US Arrests by Type")
+```
+![BoxPlot1](images/R-BoxPlot1.jpg)
+
+
+## Piping Support and Examples
+
+Standard (simple) piping is supported in the package.  You can pipe a canvasXpress object into the canvasXpress() function and make changes to the configuration of the object.  Primary data variables (data, varAnnot and smpAnnot) are not able to be changed via this method, but any other changes (both additions and subtractions) are supported.  The magrittr pipe and R pipe (4.2 and above) can both be used to access this functionality as well as using the function syntax to set the first argument to another canvasXpress object.  To change or add a configuration value, simply (re)define it in the piped function call; to remove a previously defined configuration value set the value to NULL.
+
+Create an initial chart
+```r
+initial_cx <- canvasXpress(
+    data                  = read.table("https://www.canvasxpress.org/data/cX-mtcars-dat.txt", 
+                            header = TRUE, sep = "\t", quote = "", row.names = 1, fill = TRUE, 
+                            check.names = FALSE, stringsAsFactors = FALSE),
+    asSampleFactors       = list("cyl"),
+    stringVariableFactors = list("cyl"),
+    colorBy               = "cyl",
+    graphType             = "Scatter2D")
+
+initial_cx
+```
+![Piping1](images/piping1.jpg)
+
+Update this chart using the magrittr pipe to add a title and subtitle, change the x and y axis, show a regression line and set the theme.
+
+```r
+update_1 <- initial_cx %>% canvasXpress(
+    title                             = "mtcars wt vs mpg",
+    subtitle                          = "regression by cyl",
+    showRegressionFit                 = "cyl",
+    confidenceIntervalColorCoordinate = TRUE,
+    theme                             = "GGPlot",
+    xAxis                             = "wt",
+    yAxis                             = "mpg"
+)
+
+update_1
+```
+![Piping2](images/piping2.jpg)
+
+Update the chart again using the R base pipe to change to a single regression line and remove the subtitle and theme configuration values
+
+```r
+update_2 <- update_1 |> canvasXpress(
+    showRegressionFit = TRUE,
+    subtitle          = NULL,
+    theme             = NULL,
+)
+
+update_2
+```
+![Piping3](images/piping3.jpg)
+
+
+
+## Additional Information 
+
+Additional information and many examples with R code for the ***canvasXpress*** 
+library can be found at
+[https://www.canvasxpress.org](https://www.canvasxpress.org).
