@@ -1,5 +1,5 @@
 Package: canvasXpress
-Version: 1.52.8.9000
+Version: 1.53.2.9000
 Title: Visualization Package for CanvasXpress in R
 Description: Enables creation of visualizations using the CanvasXpress framework
     in R. CanvasXpress is a standalone JavaScript library for reproducible research
@@ -23,7 +23,7 @@ Suggests: shiny (>= 1.1.0), canvasXpress.data, dplyr, DT, glue, grid,
         tidyr, limma, ggplot2, survminer
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2024-11-06 04:01:01 UTC; mohammedali
+Packaged: 2024-12-18 06:09:51 UTC; mohammedali
 Author: Isaac Neuhaus [aut],
   Connie Brett [aut, cre]
 Maintainer: Connie Brett <mohammed@aggregate-genius.com>
