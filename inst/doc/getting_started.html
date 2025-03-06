@@ -12,7 +12,7 @@
 
 <meta name="author" content="Isaac Neuhaus" />
 
-<meta name="date" content="2025-02-18" />
+<meta name="date" content="2025-03-06" />
 
 <title>Getting Started with canvasXpress in R</title>
 
@@ -340,7 +340,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Getting Started with canvasXpress in R</h1>
 <h4 class="author">Isaac Neuhaus</h4>
-<h4 class="date">2025-02-18</h4>
+<h4 class="date">2025-03-06</h4>
 
 
 <div id="TOC">
@@ -391,9 +391,9 @@ package.</p>
 <h2>Examples</h2>
 <div id="scatter-3d-plot" class="section level3">
 <h3>Scatter 3D Plot</h3>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/cX-irist-dat.txt&quot;</span>, <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, </span>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/r/cX-irist-dat.txt&quot;</span>, <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, </span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>                <span class="at">quote=</span><span class="st">&quot;&quot;</span>, <span class="at">row.names=</span><span class="dv">1</span>, <span class="at">fill=</span><span class="cn">TRUE</span>, <span class="at">check.names=</span><span class="cn">FALSE</span>, <span class="at">stringsAsFactors=</span><span class="cn">FALSE</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/cX-irist-var.txt&quot;</span>, <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, </span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/r/cX-irist-var.txt&quot;</span>, <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, </span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>                <span class="at">quote=</span><span class="st">&quot;&quot;</span>, <span class="at">row.names=</span><span class="dv">1</span>, <span class="at">fill=</span><span class="cn">TRUE</span>, <span class="at">check.names=</span><span class="cn">FALSE</span>, <span class="at">stringsAsFactors=</span><span class="cn">FALSE</span>)</span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>               </span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">canvasXpress</span>(<span class="at">data      =</span> y,</span>
@@ -415,9 +415,9 @@ package.</p>
 </div>
 <div id="scatter-2d-matrix-plot" class="section level3">
 <h3>Scatter 2D Matrix Plot</h3>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/cX-irist-dat.txt&quot;</span>, <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, </span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/r/cX-irist-dat.txt&quot;</span>, <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, </span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>                <span class="at">quote=</span><span class="st">&quot;&quot;</span>, <span class="at">row.names=</span><span class="dv">1</span>, <span class="at">fill=</span><span class="cn">TRUE</span>, <span class="at">check.names=</span><span class="cn">FALSE</span>, <span class="at">stringsAsFactors=</span><span class="cn">FALSE</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/cX-irist-var.txt&quot;</span>, <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, </span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/r/cX-irist-var.txt&quot;</span>, <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, </span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>                <span class="at">quote=</span><span class="st">&quot;&quot;</span>, <span class="at">row.names=</span><span class="dv">1</span>, <span class="at">fill=</span><span class="cn">TRUE</span>, <span class="at">check.names=</span><span class="cn">FALSE</span>, <span class="at">stringsAsFactors=</span><span class="cn">FALSE</span>)</span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>                   </span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">canvasXpress</span>(<span class="at">data              =</span> y,</span>
@@ -434,9 +434,9 @@ package.</p>
 </div>
 <div id="boxplot" class="section level3">
 <h3>Boxplot</h3>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://www.canvasxpress.org/data/cX-toothgrowth-dat.txt&quot;</span>, <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, </span>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://www.canvasxpress.org/data/r/cX-toothgrowth-dat.txt&quot;</span>, <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, </span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>                <span class="at">quote=</span><span class="st">&quot;&quot;</span>, <span class="at">row.names=</span><span class="dv">1</span>, <span class="at">fill=</span><span class="cn">TRUE</span>, <span class="at">check.names=</span><span class="cn">FALSE</span>, <span class="at">stringsAsFactors=</span><span class="cn">FALSE</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://www.canvasxpress.org/data/cX-toothgrowth-smp.txt&quot;</span>, <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, </span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://www.canvasxpress.org/data/r/cX-toothgrowth-smp.txt&quot;</span>, <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, </span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                <span class="at">quote=</span><span class="st">&quot;&quot;</span>, <span class="at">row.names=</span><span class="dv">1</span>, <span class="at">fill=</span><span class="cn">TRUE</span>, <span class="at">check.names=</span><span class="cn">FALSE</span>, <span class="at">stringsAsFactors=</span><span class="cn">FALSE</span>)</span>
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>                </span>
 <span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="fu">canvasXpress</span>(<span class="at">data                  =</span> y,</span>
@@ -460,22 +460,22 @@ package.</p>
 </div>
 <div id="heatmap" class="section level3">
 <h3>Heatmap</h3>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>y  <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/cX-multidimensionalheatmap-dat.txt&quot;</span>,</span>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>y  <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/r/cX-multidimensionalheatmap-dat.txt&quot;</span>,</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>                 <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, <span class="at">quote=</span><span class="st">&quot;&quot;</span>, <span class="at">row.names=</span><span class="dv">1</span>, <span class="at">fill=</span><span class="cn">TRUE</span>, </span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                 <span class="at">check.names=</span><span class="cn">FALSE</span>, <span class="at">stringsAsFactors=</span><span class="cn">FALSE</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>y2 <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/cX-multidimensionalheatmap-dat2.txt&quot;</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>y2 <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/r/cX-multidimensionalheatmap-dat2.txt&quot;</span>,</span>
 <span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>                 <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, <span class="at">quote=</span><span class="st">&quot;&quot;</span>, <span class="at">row.names=</span><span class="dv">1</span>, <span class="at">fill=</span><span class="cn">TRUE</span>, </span>
 <span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>                    <span class="at">check.names=</span><span class="cn">FALSE</span>, <span class="at">stringsAsFactors=</span><span class="cn">FALSE</span>)</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>y3 <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/cX-multidimensionalheatmap-dat3.txt&quot;</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>y3 <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/r/cX-multidimensionalheatmap-dat3.txt&quot;</span>,</span>
 <span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>                 <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, <span class="at">quote=</span><span class="st">&quot;&quot;</span>, <span class="at">row.names=</span><span class="dv">1</span>, <span class="at">fill=</span><span class="cn">TRUE</span>, </span>
 <span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>                 <span class="at">check.names=</span><span class="cn">FALSE</span>, <span class="at">stringsAsFactors=</span><span class="cn">FALSE</span>)</span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>y4 <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/cX-multidimensionalheatmap-dat4.txt&quot;</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>y4 <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/r/cX-multidimensionalheatmap-dat4.txt&quot;</span>,</span>
 <span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>                 <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, <span class="at">quote=</span><span class="st">&quot;&quot;</span>, <span class="at">row.names=</span><span class="dv">1</span>, <span class="at">fill=</span><span class="cn">TRUE</span>, </span>
 <span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>                 <span class="at">check.names=</span><span class="cn">FALSE</span>, <span class="at">stringsAsFactors=</span><span class="cn">FALSE</span>)</span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>x  <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/cX-multidimensionalheatmap-smp.txt&quot;</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>x  <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/r/cX-multidimensionalheatmap-smp.txt&quot;</span>,</span>
 <span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>                 <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, <span class="at">quote=</span><span class="st">&quot;&quot;</span>, <span class="at">row.names=</span><span class="dv">1</span>, <span class="at">fill=</span><span class="cn">TRUE</span>, </span>
 <span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>                 <span class="at">check.names=</span><span class="cn">FALSE</span>, <span class="at">stringsAsFactors=</span><span class="cn">FALSE</span>)</span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>z  <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/cX-multidimensionalheatmap-var.txt&quot;</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>z  <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;https://canvasxpress.org/data/r/cX-multidimensionalheatmap-var.txt&quot;</span>,</span>
 <span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>                 <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, <span class="at">quote=</span><span class="st">&quot;&quot;</span>, <span class="at">row.names=</span><span class="dv">1</span>, <span class="at">fill=</span><span class="cn">TRUE</span>, </span>
 <span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>                 <span class="at">check.names=</span><span class="cn">FALSE</span>, <span class="at">stringsAsFactors=</span><span class="cn">FALSE</span>)</span>
 <span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a></span>
