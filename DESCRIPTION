@@ -24,7 +24,7 @@ Suggests: shiny (>= 1.1.0), canvasXpress.data, dplyr, DT, glue, grid,
         ggpubr, ggpattern
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2026-07-22 16:01:20 UTC; mohammedali
+Packaged: 2026-07-23 07:26:33 UTC; mohammedali
 Author: Isaac Neuhaus [aut],
   Connie Brett [aut, cre]
 Maintainer: Connie Brett <mohammed@aggregate-genius.com>
