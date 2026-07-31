@@ -4,7 +4,7 @@
 \alias{ggplot.as.list}
 \title{Converts a ggplot object to a list that can be used by CanvasXpress.}
 \usage{
-\method{ggplot}{as.list}(o, ...)
+ggplot.as.list(o, ...)
 }
 \arguments{
 \item{o}{the ggplot object}
