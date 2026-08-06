@@ -28,7 +28,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Connie Brett \email{connie@aggregate-genius.com}
+\strong{Maintainer}: Connie Brett \email{mohammed@aggregate-genius.com}
 
 Authors:
 \itemize{
