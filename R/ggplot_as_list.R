@@ -97,7 +97,98 @@ ggplot.as.list <- function(o, ...) { # nolint: object_name_linter.
     cx <- gg_cxplot(o, "canvas", ...)
   }
 
-  jsonlite::toJSON(cx, pretty = TRUE, auto_unbox = TRUE)
+  gg_serialize(cx)
+}
+
+## Row count above which the single-plot data matrix is written compactly
+## (numeric columns unquoted, no pretty-print whitespace). At or below it the
+## historical pretty output is kept byte-for-byte.
+gg_compact_rows <- 10000L
+
+## A cell that is already a legal JSON number. Leading zeros, "NA", "Inf", a
+## leading "+" and a bare "." are deliberately excluded so they stay strings.
+gg_json_number <- "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?$"
+
+## Serialize the ggplot list. Large single-plot data matrices (one row per
+## observation) are the bulk of the payload, and as a pretty-printed character
+## matrix they cost both R and the browser: every number becomes a quoted string
+## with whitespace around it. Those are written compactly instead; everything
+## else is serialized exactly as before.
+gg_serialize <- function(cx) {
+  m <- cx$data
+  big <- is.matrix(m) && is.character(m) && nrow(m) - 1L > gg_compact_rows
+  data_json <- if (big) gg_matrix_to_json(m) else NULL
+  if (is.null(data_json)) {
+    return(jsonlite::toJSON(cx, pretty = TRUE, auto_unbox = TRUE))
+  }
+  placeholder <- "__CX_COMPACT_DATA__"
+  cx$data <- placeholder
+  txt <- as.character(jsonlite::toJSON(cx, pretty = TRUE, auto_unbox = TRUE))
+  hit <- regexpr(paste0("\"", placeholder, "\""), txt, fixed = TRUE)
+  stopifnot(hit > 0L)
+  txt <- paste0(substr(txt, 1L, hit - 1L), data_json,
+                substr(txt, hit + attr(hit, "match.length"), nchar(txt)))
+  structure(txt, class = "json")
+}
+
+## JSON text for the data matrix produced by data_to_matrix(): a character
+## matrix whose first row is the header and whose first column is the Id.
+## Columns after the Id whose every non-NA cell is a legal JSON number are
+## emitted unquoted -- the same digits the engine would have parsed from the
+## quoted string, so the values are unchanged. Returns NULL (caller falls back
+## to the standard path) if a quoted cell holds a control character that the
+## cheap escaping below does not cover.
+gg_matrix_to_json <- function(m) {
+  quote_cells <- function(v) {
+    out <- rep("null", length(v))
+    ok <- !is.na(v)
+    s <- v[ok]
+    # One scan finds any backslash, quote or control character; the common case
+    # (none) needs no escaping at all.
+    if (any(grepl("[\\\\\"\\x01-\\x1f]", s, perl = TRUE))) {
+      s <- gsub("\\", "\\\\", s, fixed = TRUE)
+      s <- gsub("\"", "\\\"", s, fixed = TRUE)
+      s <- gsub("\n", "\\n", s, fixed = TRUE)
+      s <- gsub("\r", "\\r", s, fixed = TRUE)
+      s <- gsub("\t", "\\t", s, fixed = TRUE)
+      if (any(grepl("[\\x01-\\x1f]", s, perl = TRUE))) {
+        return(NULL)
+      }
+    }
+    out[ok] <- paste0("\"", s, "\"")
+    out
+  }
+  cols <- vector("list", ncol(m))
+  for (j in seq_len(ncol(m))) {
+    v <- m[, j]
+    body <- v[-1L]
+    vals <- body[!is.na(body)]
+    numeric_col <- j > 1L && length(vals) > 0L &&
+      all(grepl(gg_json_number, vals, perl = TRUE))
+    if (numeric_col) {
+      cell <- body
+      cell[is.na(cell)] <- "null"
+      header <- quote_cells(v[1L])
+      if (is.null(header)) {
+        return(NULL)
+      }
+      cols[[j]] <- c(header, cell)
+    } else {
+      cell <- quote_cells(v)
+      if (is.null(cell)) {
+        return(NULL)
+      }
+      cols[[j]] <- cell
+    }
+  }
+  # One paste0 pass builds every row body (c1,c2,...); rows are joined by "],["
+  # and the outer brackets are added once.
+  pieces <- list()
+  for (j in seq_along(cols)) {
+    pieces <- c(pieces, if (j > 1L) list(","), list(cols[[j]]))
+  }
+  rows <- do.call(paste0, c(pieces, list(collapse = "],[")))
+  paste0("[[", rows, "]]")
 }
 
 # nolint start: commented_code_linter.
@@ -695,6 +786,34 @@ gg_sankey_to_alluvia <- function(o) {
   o
 }
 
+## autoplot(forecast(...)) builds ggplot() with no plot data: the observed series
+## and the forecast each arrive as layer data, so the converter would emit an empty
+## data frame. Promote the first data-carrying non-forecast layer's data and mapping
+## to the plot; that layer then inherits the identical data, so ggplot_build is
+## unchanged. The layer is cloned first (ggproto layers are reference objects, so
+## editing it in place would mutate the caller's plot). Scoped to GeomForecast plots.
+gg_forecast_hoist_data <- function(o) {
+  classes <- vapply(o$layers, function(l) class(l$geom)[1], character(1))
+  if (!("GeomForecast" %in% classes) || (is.data.frame(o$data) && nrow(o$data) > 0)) {
+    return(o)
+  }
+  for (i in seq_along(o$layers)) {
+    l <- o$layers[[i]]
+    if (classes[i] != "GeomForecast" && is.data.frame(l$data) && nrow(l$data) > 0) {
+      o$data <- l$data
+      m <- o$mapping
+      for (n in names(l$mapping)) {
+        m[[n]] <- l$mapping[[n]]
+      }
+      o$mapping <- m
+      o$layers[[i]] <- ggplot2::ggproto(NULL, l)
+      o$layers[[i]]$data <- ggplot2::waiver()
+      return(o)
+    }
+  }
+  o
+}
+
 gg_cxplot <- function(o, target, ...) {
 
   config <- list(...)
@@ -706,6 +825,8 @@ gg_cxplot <- function(o, target, ...) {
   o <- gg_sankey_to_alluvia(o)
 
   o <- gg_lodes_to_alluvia(o)
+
+  o <- gg_forecast_hoist_data(o)
 
   meta <- as.list(sapply(o$data, is.factor))
 
@@ -1943,7 +2064,12 @@ gg_proc_layer <- function(o, idx, bld) {
   }
   skip <- c("compute_panel", "preserve", "setup_data", "setup_params",
             "super", "compute_layer", "orientation", "contour",
-            "distribution", "length")
+            "distribution", "length",
+            # ggplot2 >= 4.0.3.9000 (NEWS #6551) adds a band_gp geom_param to
+            # GeomSmooth holding the confidence band's colour/linetype/linewidth.
+            # CanvasXpress styles the band its own way and never read this, so
+            # drop it - otherwise it leaks into the emitted JSON (issue #331).
+            "band_gp")
   skip2 <- c("na.rm", "reverse", "vjust")
   skip_values <- list(na.rm = FALSE, reverse = FALSE, vjust = 1)
 
@@ -2053,6 +2179,14 @@ gg_proc_layer <- function(o, idx, bld) {
       r$data <- as.matrix(nd)
     }
   }
+  if (class(l$geom)[1] == "GeomForecast") {
+    ## forecast::geom_forecast / autoplot(forecast(...)): the forecast is computed
+    ## IN R (any model -- ets, arima, HoltWinters), so emit R's built rows and
+    ## CanvasXpress draws R's numbers rather than refitting (R is the oracle). The
+    ## generic layer data above keeps only x/y/label/colour/..., dropping the
+    ## interval columns, and emits nothing for a StatForecast layer (inherited data).
+    r$data <- gg_forecast_layer_data(bld$data[[idx]], bld)
+  }
   prps <- c("colour", "color", "fill", "alpha", "shape")
   for (p in prps) {
     aes_col <- if (p == "colour") "colour" else p
@@ -2071,6 +2205,98 @@ gg_proc_layer <- function(o, idx, bld) {
     }
   }
   r
+}
+
+## The built rows of a GeomForecast layer: one point-forecast row per step
+## (level NA, y set) plus one row per step and interval level (ymin/ymax set).
+## levelColors replicates forecast's GeomForecastInterval shading: each level
+## maps to a grey from 8/15 (lowest level) to 8/15 + 0.2 (highest) that
+## blendHex mixes into the line colour, so the bands match exactly. Built rows are
+## in transformed scale space (scale_y_reverse stores -y, scale_y_log10 log10(y)),
+## while CanvasXpress applies the axis transform itself to the plot data, so the
+## positions are mapped back to data space through each row's panel scale.
+gg_forecast_layer_data <- function(dl, bld) {
+  num <- function(k) if (k %in% colnames(dl)) as.numeric(dl[[k]]) else rep(NA_real_, nrow(dl))
+  r <- list(x = num("x"), y = num("y"), level = num("level"),
+            ymin = num("ymin"), ymax = num("ymax"))
+  inverse <- function(scale) {
+    tr <- if (!is.null(scale$get_transformation)) scale$get_transformation() else scale$trans
+    if (is.null(tr) || is.null(tr$inverse)) function(v) v else tr$inverse
+  }
+  panels <- if ("PANEL" %in% colnames(dl)) as.integer(dl[["PANEL"]]) else rep(1L, nrow(dl))
+  layout <- bld$layout$layout
+  for (p in unique(panels)) {
+    rows <- which(panels == p)
+    lrow <- layout[layout$PANEL == p, , drop = FALSE]
+    x_inv <- inverse(bld$layout$panel_scales_x[[lrow$SCALE_X[1]]])
+    y_inv <- inverse(bld$layout$panel_scales_y[[lrow$SCALE_Y[1]]])
+    r$x[rows] <- x_inv(r$x[rows])
+    for (k in c("y", "ymin", "ymax")) {
+      r[[k]][rows] <- y_inv(r[[k]][rows])
+    }
+  }
+  if ("PANEL" %in% colnames(dl)) {
+    r$panel <- as.numeric(dl[["PANEL"]])
+  }
+  if ("group" %in% colnames(dl)) {
+    r$group <- as.numeric(dl[["group"]])
+  }
+  if ("colour" %in% colnames(dl)) {
+    r$color <- as.character(dl[["colour"]])
+  }
+  levels <- sort(unique(r$level[!is.na(r$level)]))
+  if (length(levels) > 0) {
+    spread <- diff(range(levels))
+    if (spread == 0) {
+      spread <- 1
+    }
+    line_colour <- r$color[!is.na(r$color)][1]
+    r$levelColors <- list()
+    for (lv in levels) {
+      shade <- (lv - min(levels)) / spread * 0.2 + 8 / 15
+      r$levelColors[[as.character(lv)]] <- gg_blend_hex(line_colour, grDevices::rgb(shade, shade, shade), 0.7)
+    }
+  }
+  r
+}
+
+## Base-R port of forecast's (unexported) blendHex: take the hue of `mix`, the
+## lightness of `seq` and a saturation blend, in HLS. forecast builds a colorspace
+## linear-RGB object from the sRGB values and hex() re-applies sRGB gamma, so the
+## result is gamma-encoded here too (matches forecast:::blendHex on 60/60 cases).
+gg_rgb_to_hls <- function(v) {
+  mx <- max(v)
+  mn <- min(v)
+  l <- (mx + mn) / 2
+  d <- mx - mn
+  if (d == 0) {
+    return(c(0, l, 0))
+  }
+  s <- if (l < 0.5) d / (mx + mn) else d / (2 - mx - mn)
+  h <- if (mx == v[1]) ((v[2] - v[3]) / d) %% 6 else if (mx == v[2]) (v[3] - v[1]) / d + 2 else (v[1] - v[2]) / d + 4
+  c(h * 60, l, s)
+}
+
+gg_hls_to_rgb <- function(h, l, s) {
+  if (s == 0) {
+    return(c(l, l, l))
+  }
+  q <- if (l < 0.5) l * (1 + s) else l + s - l * s
+  p <- 2 * l - q
+  channel <- function(t) {
+    t <- t %% 1
+    if (t < 1 / 6) p + (q - p) * 6 * t else if (t < 1 / 2) q else if (t < 2 / 3) p + (q - p) * (2 / 3 - t) * 6 else p
+  }
+  c(channel(h / 360 + 1 / 3), channel(h / 360), channel(h / 360 - 1 / 3))
+}
+
+gg_blend_hex <- function(mix, seq, alpha) {
+  a <- gg_rgb_to_hls(grDevices::col2rgb(mix)[, 1] / 255)
+  b <- gg_rgb_to_hls(grDevices::col2rgb(seq)[, 1] / 255)
+  v <- gg_hls_to_rgb(a[1], b[2], alpha * a[3] + (1 - alpha) * b[3])
+  v <- ifelse(v <= 0.0031308, 12.92 * v, 1.055 * v^(1 / 2.4) - 0.055)
+  v <- pmin(pmax(v, 0), 1)
+  grDevices::rgb(v[1], v[2], v[3])
 }
 
 data_to_matrix <- function(o, b) {
